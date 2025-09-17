@@ -1,5 +1,18 @@
 import { ethers } from 'ethers';
-import { CertificateRegistry__factory } from '../../contracts/CertificateRegistry__factory';
+
+// Contract ABI - we'll define this manually for now
+const CERTIFICATE_REGISTRY_ABI = [
+  "function issueCertificate(address to, bytes32 certHash, string memory metadataURI) external returns (uint256)",
+  "function verifyCertificate(bytes32 certHash) external view returns (bool valid, uint256 tokenId)",
+  "function getCertificateHash(uint256 tokenId) external view returns (bytes32)",
+  "function tokenURI(uint256 tokenId) external view returns (string memory)",
+  "function totalCertificates() external view returns (uint256)",
+  "function name() external view returns (string memory)",
+  "function symbol() external view returns (string memory)",
+  "function owner() external view returns (address)",
+  "function ownerOf(uint256 tokenId) external view returns (address)",
+  "event CertificateIssued(uint256 indexed tokenId, bytes32 indexed certHash, address indexed to, string metadataURI)"
+];
 
 export interface CertificateMetadata {
   name: string;
@@ -48,7 +61,7 @@ export class BlockchainService {
         
         // Initialize contract
         if (this.contractAddress) {
-          this.contract = CertificateRegistry__factory.connect(this.contractAddress, this.signer);
+          this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.signer);
         }
         
         return true;
