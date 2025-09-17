@@ -157,6 +157,17 @@ npm run dev
 3. Click "Verify" to check blockchain authenticity
 4. View certificate details and metadata
 
+### 5. Explore Blockchain
+
+https://custom-block-explorer.vercel.app
+
+or you can launch the local blockchain explorer::
+
+```bash
+git clone https://github.com/Shaivpidadi/custom-block-explorer
+```
+and follow the instructions.
+
 ## API Endpoints
 
 The metadata server provides the following endpoints:
