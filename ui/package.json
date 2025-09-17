@@ -30,7 +30,10 @@
     "react-extension-icons": "^1.1.6",
     "react-i18next": "^15.0.0",
     "react-pdf": "^9.1.0",
-    "react-router-dom": "^6.26.0"
+    "react-router-dom": "^6.26.0",
+    "ethers": "^6.13.5",
+    "pdf-lib": "^1.17.1",
+    "crypto-js": "^4.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
