@@ -57,13 +57,13 @@ export class BlockchainService {
     try {
       if (typeof window.ethereum !== 'undefined') {
         this.provider = new ethers.BrowserProvider(window.ethereum);
-        this.signer = await this.provider.getSigner();
-        
+        this.signer = await (this.provider as ethers.BrowserProvider).getSigner();
+
         // Initialize contract
         if (this.contractAddress) {
           this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.signer);
         }
-        
+
         return true;
       } else {
         throw new Error('MetaMask not found. Please install MetaMask.');
@@ -76,7 +76,7 @@ export class BlockchainService {
 
   async getNetworkInfo(): Promise<{ name: string; chainId: number } | null> {
     if (!this.provider) return null;
-    
+
     try {
       const network = await this.provider.getNetwork();
       return {
@@ -96,6 +96,14 @@ export class BlockchainService {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x13882' }], // 80002 in hex
         });
+        
+        // Reinitialize contract after network switch
+        if (this.contractAddress) {
+          this.provider = new ethers.BrowserProvider(window.ethereum);
+          this.signer = await (this.provider as ethers.BrowserProvider).getSigner();
+          this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.signer);
+        }
+        
         return true;
       }
       return false;
@@ -117,6 +125,14 @@ export class BlockchainService {
               blockExplorerUrls: ['https://amoy.polygonscan.com'],
             }],
           });
+          
+          // Reinitialize contract after adding network
+          if (this.contractAddress) {
+            this.provider = new ethers.BrowserProvider(window.ethereum);
+            this.signer = await (this.provider as ethers.BrowserProvider).getSigner();
+            this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.signer);
+          }
+          
           return true;
         } catch (addError) {
           console.error('Error adding Amoy network:', addError);
@@ -128,7 +144,7 @@ export class BlockchainService {
     }
   }
 
-  async uploadCertificate(file: File): Promise<{ success: boolean; hash?: string; metadataURI?: string; error?: string }> {
+  async uploadCertificate(file: File): Promise<{ success: boolean; hash?: string; metadataURI?: string; Filename?: string; error?: string }> {
     try {
       const formData = new FormData();
       formData.append('certificate', file);
@@ -139,12 +155,13 @@ export class BlockchainService {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         return {
           success: true,
           hash: result.certificateHash,
-          metadataURI: result.metadataURI
+          metadataURI: result.metadataURI,
+          Filename: result.filePath
         };
       } else {
         return {
@@ -161,15 +178,29 @@ export class BlockchainService {
     }
   }
 
-  async issueCertificate(recipientAddress: string, certificateHash: string, metadataURI: string): Promise<{ success: boolean; tokenId?: number; transactionHash?: string; error?: string }> {
-    try {
-      if (!this.contract || !this.signer) {
+  private async ensureContractInitialized(): Promise<void> {
+    if (!this.contract || !this.signer) {
+      // Try to reinitialize
+      if (typeof window.ethereum !== 'undefined' && this.contractAddress) {
+        this.provider = new ethers.BrowserProvider(window.ethereum);
+        this.signer = await (this.provider as ethers.BrowserProvider).getSigner();
+        this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.signer);
+      } else {
         throw new Error('Contract not initialized or wallet not connected');
       }
+    }
+  }
 
-      const tx = await this.contract.issueCertificate(recipientAddress, certificateHash, metadataURI);
+  async issueCertificate(recipientAddress: string, certificateHash: string, metadataURI: string): Promise<{ success: boolean; tokenId?: number; transactionHash?: string; error?: string }> {
+    try {
+      await this.ensureContractInitialized();
+
+      // Convert hex string to bytes32 format
+      const hashWithPrefix = certificateHash.startsWith('0x') ? certificateHash : `0x${certificateHash}`;
+      const hashBytes32 = ethers.getBytes(hashWithPrefix);
+      const tx = await this.contract.issueCertificate(recipientAddress, hashBytes32, metadataURI);
       const receipt = await tx.wait();
-      
+
       // Get the token ID from the event
       const event = receipt.logs.find((log: any) => {
         try {
@@ -202,12 +233,13 @@ export class BlockchainService {
 
   async verifyCertificate(certificateHash: string): Promise<VerificationResult> {
     try {
-      if (!this.contract) {
-        throw new Error('Contract not initialized');
-      }
+      await this.ensureContractInitialized();
 
-      const [isValid, tokenId] = await this.contract.verifyCertificate(certificateHash);
-      
+      // Convert hex string to bytes32 format
+      const hashWithPrefix = certificateHash.startsWith('0x') ? certificateHash : `0x${certificateHash}`;
+      const hashBytes32 = ethers.getBytes(hashWithPrefix);
+      const [isValid, tokenId] = await this.contract.verifyCertificate(hashBytes32);
+
       if (isValid && tokenId > 0) {
         // Get metadata from local server
         const metadataResponse = await fetch(`http://localhost:3000/api/metadata/${tokenId}`);
@@ -235,9 +267,7 @@ export class BlockchainService {
 
   async getCertificateInfo(tokenId: number): Promise<CertificateInfo | null> {
     try {
-      if (!this.contract) {
-        throw new Error('Contract not initialized');
-      }
+      await this.ensureContractInitialized();
 
       const [owner, certificateHash, metadataURI] = await Promise.all([
         this.contract.ownerOf(tokenId),
@@ -262,9 +292,7 @@ export class BlockchainService {
 
   async getTotalCertificates(): Promise<number> {
     try {
-      if (!this.contract) {
-        throw new Error('Contract not initialized');
-      }
+      await this.ensureContractInitialized();
 
       return Number(await this.contract.totalCertificates());
     } catch (error) {
@@ -275,9 +303,7 @@ export class BlockchainService {
 
   async getContractInfo(): Promise<{ name: string; symbol: string; owner: string } | null> {
     try {
-      if (!this.contract) {
-        throw new Error('Contract not initialized');
-      }
+      await this.ensureContractInitialized();
 
       const [name, symbol, owner] = await Promise.all([
         this.contract.name(),
@@ -294,18 +320,74 @@ export class BlockchainService {
 
   generateCertificateHash(fileBuffer: ArrayBuffer): string {
     // Simple hash generation - in production, use a more robust method
-    const hash = ethers.keccak256(ethers.getBytes(fileBuffer));
+    const hash = ethers.keccak256(new Uint8Array(fileBuffer));
     return hash;
   }
 
   async signPDF(file: File, signature: string): Promise<File> {
-    // This is a placeholder for PDF signing functionality
-    // In a real implementation, you would use a PDF library to add a digital signature
-    console.log('Signing PDF with signature:', signature);
-    
-    // For now, return the original file
-    // TODO: Implement actual PDF signing with pdf-lib
-    return file;
+    try {
+      // Import pdf-lib dynamically to avoid build issues
+      const { PDFDocument, rgb } = await import('pdf-lib');
+      
+      // Read the PDF file
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      
+      // Get the first page
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+      const { width, height } = firstPage.getSize();
+      
+      // Add signature text to the PDF
+      firstPage.drawText(`Digitally signed by: ${signature}`, {
+        x: 50,
+        y: height - 100,
+        size: 12,
+        color: rgb(0, 0, 0),
+      });
+      
+      // Add timestamp
+      const timestamp = new Date().toISOString();
+      firstPage.drawText(`Signed on: ${timestamp}`, {
+        x: 50,
+        y: height - 120,
+        size: 10,
+        color: rgb(0.5, 0.5, 0.5),
+      });
+      
+      // Add a signature box
+      firstPage.drawRectangle({
+        x: 50,
+        y: height - 150,
+        width: 200,
+        height: 30,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 1,
+      });
+      
+      firstPage.drawText('Digital Signature', {
+        x: 60,
+        y: height - 140,
+        size: 10,
+        color: rgb(0, 0, 0),
+      });
+      
+      // Save the PDF
+      const pdfBytes = await pdfDoc.save();
+      
+      // Create a new File object with the signed PDF
+      const signedFile = new File([pdfBytes], `signed_${file.name}`, {
+        type: 'application/pdf',
+        lastModified: Date.now(),
+      });
+      
+      console.log('PDF signed successfully with signature:', signature);
+      return signedFile;
+    } catch (error) {
+      console.error('Error signing PDF:', error);
+      // Return original file if signing fails
+      return file;
+    }
   }
 }
 

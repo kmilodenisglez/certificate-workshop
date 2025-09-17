@@ -3,8 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 const PORT = 3000;
 
 // Configure multer for file uploads

@@ -11,6 +11,7 @@ interface UploadResult {
   success: boolean;
   hash?: string;
   metadataURI?: string;
+  Filename?: string;
   error?: string;
 }
 
@@ -64,7 +65,15 @@ const CertificateUploader: React.FC = () => {
     accept: '.pdf,.doc,.docx',
     fileList,
     beforeUpload: (file: File) => {
-      setFileList([file]);
+      const uploadFile: UploadFile = {
+        uid: (file as any).uid || file.name,
+        name: file.name,
+        status: 'done',
+        originFileObj: file as any,
+        type: file.type,
+        size: file.size,
+      };
+      setFileList([uploadFile]);
       handleUpload(file);
       return false; // Prevent auto upload
     },
@@ -109,6 +118,7 @@ const CertificateUploader: React.FC = () => {
                   <div>
                     <div>Certificate Hash: <Text code>{uploadResult.hash}</Text></div>
                     <div>Metadata URI: <Text code>{uploadResult.metadataURI}</Text></div>
+                    <div>Filename: <Text code>{uploadResult.Filename}</Text></div>
                   </div>
                 }
                 type="success"
