@@ -51,6 +51,9 @@ npm install
 cd ui
 npm install
 cd ..
+
+# Compile contracts (generates TypeScript types)
+npm run compile
 ```
 
 ### 3. Environment Configuration
