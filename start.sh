@@ -6,15 +6,25 @@
 echo "🚀 Certificate Registry DApp - Quick Start"
 echo "=========================================="
 
+# Run system check first
+echo "Running system check..."
+./check-system.sh
+
+echo ""
+echo "Continuing with setup..."
+echo ""
+
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
     echo "❌ Node.js is not installed. Please install Node.js (v16 or higher) first."
+    echo "   See INSTALLATION.md for detailed instructions."
     exit 1
 fi
 
 # Check if npm is installed
 if ! command -v npm &> /dev/null; then
     echo "❌ npm is not installed. Please install npm first."
+    echo "   See INSTALLATION.md for detailed instructions."
     exit 1
 fi
 

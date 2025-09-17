@@ -35,9 +35,11 @@ A blockchain-based certificate registry system using ERC-721 tokens on Polygon A
 ## Setup Instructions
 
 ### 1. Prerequisites
-- Node.js (v16 or higher)
+- Node.js (v16 or higher) - [Installation Guide](INSTALLATION.md)
 - MetaMask browser extension
 - Git
+
+**Important**: If you get "node: command not found" or "npm: command not found" errors, please follow the [Installation Guide](INSTALLATION.md) to install Node.js and npm first.
 
 ### 2. Install Dependencies
 
@@ -80,12 +82,25 @@ VITE_FONT_FAMILY=Montserrat, sans-serif
 ### 4. Deploy Smart Contract
 
 #### Local Development
+
+**Option 1: Manual (Two terminals)**
 ```bash
-# Start local Hardhat node
+# Terminal 1: Start local Hardhat node
 npm run node
 
-# In another terminal, deploy to local network
+# Terminal 2: Deploy to local network
 npm run deploy:local
+```
+
+**Option 2: Automated (Single command)**
+```bash
+# Deploy and start all services automatically
+./run-local.sh
+```
+
+**Option 3: Deploy only (if node is already running)**
+```bash
+./deploy-local.sh
 ```
 
 #### Polygon Amoy Testnet
