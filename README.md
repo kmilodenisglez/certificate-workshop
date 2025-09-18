@@ -157,16 +157,84 @@ npm run dev
 3. Click "Verify" to check blockchain authenticity
 4. View certificate details and metadata
 
-### 5. Explore Blockchain
+### 5. Explore Blockchain🔹 Step-by-step guide to using it with local Hardhat
 
 https://custom-block-explorer.vercel.app
 
-or you can launch the local blockchain explorer::
+or you can launch the local blockchain explorer:
+
+#### 1. Launch your node
+
+In your Hardhat project:
 
 ```bash
-git clone https://github.com/Shaivpidadi/custom-block-explorer
+npx hardhat node
 ```
-and follow the instructions.
+
+This creates a node at:
+👉 `http://127.0.0.1:8545`
+Chain ID: `31337`
+
+---
+
+#### 2. Clone the explorer repo
+
+```bash
+git clone https://github.com/Shaivpidadi/custom-block-explorer.git
+cd custom-block-explorer
+```
+
+---
+
+#### 3. Install dependencies
+
+```bash
+npm install
+```
+
+---
+
+#### 4. Configure Hardhat RPC
+
+Create a `.env.local` file in the explorer root with:
+
+```env
+NEXT_PUBLIC_PROVIDER=http://127.0.0.1:8545
+NEXT_PUBLIC_CHAIN_ID=31337
+NEXT_PUBLIC_CHAIN_NAME=Local Hardhat
+NEXT_PUBLIC_CURRENCY_SYMBOL=ETH
+```
+
+⚡ These `NEXT_PUBLIC_*` are the variables that Next.js exposes to the frontend.
+
+---
+
+#### 5. Run Explorer
+
+```bash
+npm run dev
+```
+
+Open in the browser:
+👉 `http://localhost:3000`
+
+There you should see:
+
+* Latest blocks from your local Hardhat.
+* Transactions.
+* Search by hash or address.
+
+---
+
+#### 6. (Optional) Customization
+
+You can edit the logo, network name, or even connect it to Polygon, Sepolia, etc. just by changing the env vars.
+
+---
+
+✅ In short:
+This `custom-block-explorer` is like a **Metamask for the browser**, but read-only, without running heavy indexers.
+Ideal for quickly debugging what you deploy in Hardhat.
 
 ## API Endpoints
 
