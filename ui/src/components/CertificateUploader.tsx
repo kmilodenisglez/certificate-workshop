@@ -160,9 +160,29 @@ const CertificateUploader: React.FC = () => {
               />
             ) : (
               <Alert
-                message="Issue Failed"
-                description={issueResult.error}
+                message="Certificate Issue Failed"
+                description={
+                  <div>
+                    <div className="mb-2">{issueResult.error}</div>
+                    {issueResult.error?.includes('already been issued') && (
+                      <div className="text-sm text-gray-600">
+                        💡 <strong>Tip:</strong> Try uploading a different file or check if this certificate was already issued.
+                      </div>
+                    )}
+                    {issueResult.error?.includes('insufficient funds') && (
+                      <div className="text-sm text-gray-600">
+                        💡 <strong>Tip:</strong> Add more ETH to your wallet to cover gas fees.
+                      </div>
+                    )}
+                    {issueResult.error?.includes('contract owner') && (
+                      <div className="text-sm text-gray-600">
+                        💡 <strong>Tip:</strong> Only the contract owner can issue certificates. Check your wallet connection.
+                      </div>
+                    )}
+                  </div>
+                }
                 type="error"
+                showIcon
               />
             )}
           </div>

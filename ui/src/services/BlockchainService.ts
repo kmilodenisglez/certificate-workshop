@@ -224,9 +224,38 @@ export class BlockchainService {
       };
     } catch (error: any) {
       console.error('Error issuing certificate:', error);
+      
+      // Handle specific error cases
+      let errorMessage = 'Failed to issue certificate';
+      
+      if (error.reason) {
+        // Handle revert reasons from smart contract
+        switch (error.reason) {
+          case 'Certificate already issued':
+            errorMessage = 'This certificate has already been issued. Each certificate can only be issued once.';
+            break;
+          case 'Ownable: caller is not the owner':
+            errorMessage = 'Only the contract owner can issue certificates.';
+            break;
+          default:
+            errorMessage = `Smart contract error: ${error.reason}`;
+        }
+      } else if (error.message) {
+        // Handle other errors
+        if (error.message.includes('insufficient funds')) {
+          errorMessage = 'Insufficient funds for gas fees. Please add more ETH to your wallet.';
+        } else if (error.message.includes('user rejected')) {
+          errorMessage = 'Transaction was cancelled by user.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       return {
         success: false,
-        error: error.message || 'Failed to issue certificate'
+        error: errorMessage
       };
     }
   }
