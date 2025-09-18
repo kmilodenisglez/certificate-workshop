@@ -2,7 +2,7 @@ import { ConfigProvider, Layout, Tabs } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import { AliasToken } from "antd/es/theme/interface";
 import backgroundImage from "./assets/images/fondoVP.svg";
-import validProofLogo from "./assets/images/logo-ValidProf.svg";
+// import validProofLogo from "./assets/images/logo-ValidProf.svg";
 import { BlockchainProvider } from "./providers/BlockchainProvider";
 import WalletConnection from "./components/WalletConnection";
 import CertificateUploader from "./components/CertificateUploader";
@@ -68,8 +68,8 @@ function App() {
             className="py-8 px-4 z-0"
             src={
               import.meta.env.VITE_LOGO
-                ? import.meta.env.VITE_LOGO
-                : validProofLogo
+                // ? import.meta.env.VITE_LOGO
+                // : validProofLogo
             }
           />
         </Header>
@@ -83,7 +83,7 @@ function App() {
                 Blockchain-verified certificates on Polygon Amoy
               </p>
             </div>
-            
+
             <BlockchainProvider>
               <Tabs
                 items={tabItems}
