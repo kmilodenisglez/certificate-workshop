@@ -144,6 +144,57 @@ export class BlockchainService {
     }
   }
 
+  async switchToLocalhostNetwork(): Promise<boolean> {
+    try {
+      if (typeof window.ethereum !== 'undefined') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x7A69' }], // 31337 en hex
+        });
+        // Reinitialize contract after network switch
+        if (this.contractAddress) {
+          this.provider = new ethers.BrowserProvider(window.ethereum);
+          this.signer = await (this.provider as ethers.BrowserProvider).getSigner();
+          this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.signer);
+        }
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      if (error.code === 4902) {
+        // Chain not added, add it
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x7A69',
+              chainName: 'Localhost 31337',
+              rpcUrls: ['http://127.0.0.1:8545'],
+              nativeCurrency: {
+                name: 'ETH',
+                symbol: 'ETH',
+                decimals: 18,
+              },
+              blockExplorerUrls: [],
+            }],
+          });
+          // Reinitialize contract after adding network
+          if (this.contractAddress) {
+            this.provider = new ethers.BrowserProvider(window.ethereum);
+            this.signer = await (this.provider as ethers.BrowserProvider).getSigner();
+            this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.signer);
+          }
+          return true;
+        } catch (addError) {
+          console.error('Error adding localhost network:', addError);
+          return false;
+        }
+      }
+      console.error('Error switching to localhost network:', error);
+      return false;
+    }
+  }
+
   async uploadCertificate(file: File): Promise<{ success: boolean; hash?: string; metadataURI?: string; Filename?: string; error?: string }> {
     try {
       const formData = new FormData();

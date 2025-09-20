@@ -14,6 +14,7 @@ export interface BlockchainState {
   // Actions
   connectWallet: () => Promise<boolean>;
   switchToAmoyNetwork: () => Promise<boolean>;
+  switchToLocalhostNetwork: () => Promise<boolean>;
   uploadCertificate: (file: File) => Promise<{ success: boolean; hash?: string; metadataURI?: string; error?: string }>;
   issueCertificate: (recipientAddress: string, certificateHash: string, metadataURI: string) => Promise<{ success: boolean; tokenId?: number; transactionHash?: string; error?: string }>;
   verifyCertificate: (certificateHash: string) => Promise<VerificationResult>;
@@ -168,6 +169,26 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({ children
     }
   };
 
+  const switchToLocalhostNetwork = async (): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const success = await blockchainService.switchToLocalhostNetwork();
+      if (success) {
+        const networkInfo = await blockchainService.getNetworkInfo();
+        setNetwork(networkInfo);
+        message.success('Switched to Localhost network!');
+      } else {
+        setError('Failed to switch network');
+        message.error('Failed to switch network');
+      }
+      return success;
+    } finally {
+      setIsLoading(false);
+    }
+};
+
+
   const uploadCertificate = async (file: File) => {
     setIsLoading(true);
     setError(null);
@@ -274,6 +295,7 @@ export const BlockchainProvider: React.FC<BlockchainProviderProps> = ({ children
     // Actions
     connectWallet,
     switchToAmoyNetwork,
+    switchToLocalhostNetwork,
     uploadCertificate,
     issueCertificate,
     verifyCertificate,

@@ -12,6 +12,7 @@ const WalletConnection: React.FC = () => {
     network,
     connectWallet,
     switchToAmoyNetwork,
+    switchToLocalhostNetwork,
     isLoading,
     error,
     contractInfo,
@@ -103,6 +104,27 @@ const WalletConnection: React.FC = () => {
                 {getNetworkName(network?.chainId || 0)}
               </Tag>
             </div>
+            {/* Selector de red */}
+            <Space className="mt-2">
+              <Button
+                type="default"
+                size="small"
+                onClick={switchToLocalhostNetwork}
+                disabled={network?.chainId === 31337}
+                loading={isLoading}
+              >
+                Localhost
+              </Button>
+              <Button
+                type="default"
+                size="small"
+                onClick={switchToAmoyNetwork}
+                disabled={network?.chainId === 80002}
+                loading={isLoading}
+              >
+                Amoy
+              </Button>
+            </Space>
           </div>
         </div>
 
