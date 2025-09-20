@@ -1,9 +1,9 @@
-const hre = require("hardhat");
-const { ethers } = require("ethers");
+import hre from "hardhat";
+import { ethers } from "ethers";
 
 // Example usage:
-// npx hardhat run scripts/interact.js --network localhost
-// npx hardhat run scripts/interact.js --network amoy
+// npx hardhat run scripts/interact.mjs --network localhost
+// npx hardhat run scripts/interact.mjs --network amoy
 
 async function main() {
     // Replace with your deployed contract address

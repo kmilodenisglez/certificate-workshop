@@ -1,9 +1,13 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const crypto = require('crypto');
-const cors = require('cors');
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import multer from 'multer';
+import crypto from 'crypto';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -153,4 +157,4 @@ app.listen(PORT, () => {
   console.log(`Verification endpoint: GET http://localhost:${PORT}/api/verify/:hash`);
 });
 
-module.exports = app;
+export default app;

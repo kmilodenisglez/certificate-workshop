@@ -105,6 +105,9 @@ async function main() {
   if (networkInfo.chainId === 80002n) { // Amoy testnet
     console.log("\nTo verify the contract on PolygonScan, run:");
     console.log(`npx hardhat verify --network amoy ${contractAddress} "Certificate Registry" "CERT"`);
+    console.log("\n📝 Amoy testnet deployment completed successfully!");
+    console.log("💡 To use this contract in your UI, update VITE_CONTRACT_ADDRESS with:");
+    console.log(`   ${contractAddress}`);
   } else if (networkInfo.chainId === 31337n) { // Hardhat local
     console.log("\n📝 Local deployment completed successfully!");
     console.log("💡 To use this contract in your UI, update VITE_CONTRACT_ADDRESS with:");
