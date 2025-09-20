@@ -1,8 +1,13 @@
-import type { HardhatUserConfig } from "hardhat/config";
+import type {HardhatUserConfig} from "hardhat/config";
+import etherscanConfig from "./etherscan.config";
+
 import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
 import "@nomicfoundation/hardhat-typechain";
+import "@nomicfoundation/hardhat-verify";
+
 
 import * as dotenv from "dotenv";
+
 dotenv.config(); // carga las variables de .env
 
 // Make sure you have these environment variables in your .env file
@@ -53,7 +58,8 @@ const config: HardhatUserConfig = {
         outDir: "typechain-types",
         alwaysGenerateOverloads: false,
         dontOverrideCompile: false
-    }
+    },
+    ...etherscanConfig
 };
 
 export default config;
